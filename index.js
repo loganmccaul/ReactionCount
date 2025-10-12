@@ -216,9 +216,9 @@ document.body.addEventListener("click", (e) => {
     return;
   }
 
-  // Share top 5 link
+  // Share top 10 link
   if (e.target && e.target.classList.contains("share")) {
-    copy([...document.querySelectorAll(".bar")].slice(0, 5)).then(() =>
+    copy([...document.querySelectorAll(".bar")].slice(0, 10)).then(() =>
       showTooltip(e.target)
     );
     return;

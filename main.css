@@ -262,3 +262,15 @@ main {
 .description a {
     color: var(--link);
 }
+
+/** FOOTER */
+footer {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 2rem 0;
+}
+
+footer p a {
+    color: var(--link);
+}

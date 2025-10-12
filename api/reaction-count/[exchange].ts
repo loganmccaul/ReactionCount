@@ -21,9 +21,7 @@ import getConcurrentRequests, { type AsyncFunction } from "../../utils/getConcur
 
 const clientSecret = process.env.CLIENT_SECRET;
 const clientId = process.env.CLIENT_ID;
-const web = new WebClient(undefined, {
-    logLevel: LogLevel.DEBUG
-});
+const web = new WebClient();
 
 interface Message {
     channel: string;
