@@ -1,4 +1,15 @@
-const getConcurrentRequests = async (requestsFns, maxLimit, responses:Object[] = []) => {
+/**
+ * Concurrent Request Utility
+ * 
+ * Executes async functions in batches with configurable concurrency limits to prevent 
+ * overwhelming APIs with rate limits. Recursively processes remaining requests while 
+ * accumulating results and handling failures gracefully.
+ * 
+ * Kept generic to handle any array of promises.
+ */
+
+export type AsyncFunction<T> = () => Promise<T>;
+const getConcurrentRequests = async <T>(requestsFns: AsyncFunction<T>[], maxLimit: number, responses: T[] = []): Promise<T[]> => {
     let limit = maxLimit;
     if (limit > requestsFns.length) {
         limit = requestsFns.length;
@@ -8,7 +19,7 @@ const getConcurrentRequests = async (requestsFns, maxLimit, responses:Object[] =
         return responses;
     }
 
-    const concurrentRequests:Function[] = [];
+    const concurrentRequests: Promise<T>[] = [];
     for (let i = 0; i < limit; i++) {
         concurrentRequests.push(requestsFns[i]());
     }

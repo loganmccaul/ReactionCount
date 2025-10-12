@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@slack/web-api": "^7.9.3",
-    "jwt-decode": "^4.0.0"
+    "jwt-decode": "^4.0.0",
+    "node-emoji": "^2.2.0"
   }
 }
