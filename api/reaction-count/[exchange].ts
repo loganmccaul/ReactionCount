@@ -19,10 +19,10 @@ import * as emoji from 'node-emoji'
 import getConcurrentRequests, { type AsyncFunction } from "../../utils/getConcurrentRequests";
 
 
-const appToken = process.env.SLACK_TOKEN;
 const clientSecret = process.env.CLIENT_SECRET;
-const web = new WebClient(appToken, {
-    loglLevel: LogLevel.DEBUG
+const clientId = process.env.CLIENT_ID;
+const web = new WebClient(undefined, {
+    logLevel: LogLevel.DEBUG
 });
 
 interface Message {
@@ -91,8 +91,8 @@ export async function GET(request: Request) {
     const exchange = url.searchParams.get('exchange');
 
     // Authenticate user
-    const {id_token: jwt, access_token: accessToken} = await web.openid.connect.token({
-        "client_id": "9123714932405.9679885928822",
+    const { id_token: jwt, access_token: accessToken } = await web.openid.connect.token({
+        "client_id": clientId,
         "client_secret": clientSecret,
         "grant_type": "authorization_code",
         code: exchange
@@ -102,7 +102,7 @@ export async function GET(request: Request) {
     const {"https://slack.com/user_id": userId } = jwtDecode<SlackJWTPayload>(jwt);
 
     // Get custom emojies
-    const emojis = await web.emoji.list({token: accessToken});
+    const emojis = await web.emoji.list({ token: accessToken });
     console.log(emojis);
 
     const startTime = Date.now();
