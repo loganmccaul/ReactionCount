@@ -188,6 +188,7 @@ main {
 .reaction {
     position: absolute;
     left: -36px;
+    cursor: default;
 }
 
 .reaction img {

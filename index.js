@@ -167,7 +167,7 @@ if (exchange) {
 /** COPY FUNCTIONALITY */
 const copy = (bars) => {
   // Table Header
-  let text = `reaction         count       rank`;
+  let text = `*reaction         count       rank*`;
 
   // Utility functions
   const addSpace = (text, length) =>
@@ -187,13 +187,13 @@ const copy = (bars) => {
     const emoji = bar.dataset.name;
 
     text = `${text}
-${handleTextEmojis(emoji) + addSpace(emoji, 14)}${addSpace(count, 7) + count + addSpace(count, 8)}${addSpace(index, 5) + index}`;
+${handleTextEmojis(emoji) + addSpace('  ', 14)}${addSpace('', 7) + count + addSpace(count, 12)}${addSpace(index, 5) + index}`;
   });
 
   // Add footer link
   text = `${text}
-https://reaction-count.vercel.app`;
 
+https://reaction-count.vercel.app`;
   return navigator.clipboard.writeText(text);
 };
 
