@@ -92,7 +92,7 @@ export async function GET(request: Request) {
 
     // Authenticate user
     const {id_token: jwt, access_token: accessToken} = await web.openid.connect.token({
-        "client_id": "9157193857749.9152727733619",
+        "client_id": "9123714932405.9679885928822",
         "client_secret": clientSecret,
         "grant_type": "authorization_code",
         code: exchange
