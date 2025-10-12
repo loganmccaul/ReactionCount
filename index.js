@@ -166,13 +166,21 @@ if (exchange) {
 
 /** COPY FUNCTIONALITY */
 const copy = (bars) => {
-  // Table Header
-  let text = `*reaction         count       rank*`;
-
   // Utility functions
-  const addSpace = (text, length) =>
-    Array.from({ length: length - text.length }, () => " ").join("");
   const handleTextEmojis = (emoji) => (emoji.length > 2 ? `:${emoji}:` : emoji);
+  
+  const totalBars = 20;
+  const maxCount = document.querySelector(".bar").dataset.count.replace(',', '');
+  const barSize = parseInt(maxCount / totalBars);
+
+  const addBars = (count) => {
+    const barCount = Math.round((count / maxCount) * totalBars);
+    return Array.from({ length: barCount }, () => "█").join("");
+  }
+
+
+  // Table Header
+  let text = ``;
 
   // Add row for each bar
   bars.forEach((bar, i) => {
@@ -183,16 +191,17 @@ const copy = (bars) => {
       }
     });
 
-    const count = bar.dataset.count.toLocaleString();
+    const count = bar.dataset.count;
     const emoji = bar.dataset.name;
 
     text = `${text}
-${handleTextEmojis(emoji) + addSpace('  ', 14)}${addSpace('', 7) + count + addSpace(count, 12)}${addSpace(index, 5) + index}`;
+${index}${index < 10 ? '  ' : ''}  ${handleTextEmojis(emoji)}    ${count}  ${addBars(count.replace(',', ''))}`;
   });
 
   // Add footer link
   text = `${text}
 
+█ = ~${barSize} reactions
 https://reaction-count.vercel.app`;
   return navigator.clipboard.writeText(text);
 };
