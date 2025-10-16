@@ -267,9 +267,10 @@ main {
 /** FOOTER */
 footer {
     text-align: center;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: var(--text-secondary);
     margin: 2rem 0;
+    padding: 0 .5rem;
 }
 
 footer p a {
