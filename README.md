@@ -2,48 +2,67 @@
 
 A small web tool that scans your Slack messages for reactions and aggregates emoji counts so you can see how your team responds to your messages.
 
-Features
-- Exchange an OAuth code with Slack and fetch the user's access token
-- Search messages that have reactions and fetch reactions for each message
-- Aggregate and sort reaction counts (including custom emoji URLs)
-- Client-side bar chart visualization and copy-to-share output
+## Self Deploy
+If you are concerned about installing an external app into your workspace you can create an internal app in your workspace in a few steps.
 
-Quick start (development)
-1. Copy or clone the repository
-2. Install dependencies
+### Clone this repo
+1. Clone this repo so can update the environment variables
 
-```bash
-npm install
+### Create a free Vercel app
+1. Sign up or sign into Vercel, https://vercel.com
+2. Select "Add new" and then "Project"
+3. Connect the project to your cloned Github repo
+
+### Creating a Slack App
+1. Navigate to https://api.slack.com/apps
+2. Select "Create New App"
+3. Select "From a manifest"
+4. Select your workspace
+5. Copy this manifest, and update the `redirect_url` with the URL generated for your Vercel project:
+```JSON
+{
+    "display_information": {
+        "name": "Reaction Count",
+        "description": "Counts number of reactions a user has across all messages",
+        "background_color": "#3459c7",
+        "long_description": "Reaction Count enables Slack users to retrieve all the reactions they've received on all of their messages, counting them to provide a view of how other Slack users respond to their messages."
+    },
+    "oauth_config": {
+        "redirect_urls": [
+            "" // INSERT Vercel URL here
+        ],
+        "scopes": {
+            "user": [
+                "emoji:read",
+                "reactions:read",
+                "search:read"
+            ]
+        }
+    },
+    "settings": {
+        "org_deploy_enabled": true,
+        "socket_mode_enabled": false,
+        "token_rotation_enabled": false
+    }
+}
 ```
 
-3. Create a `.env` file with the following variables (example):
+### Update variables
+1. In your Vercel project, navigate to "Settings" and then "Environment Variables"
+2. Add the Client ID from your Slack app as a `CLIENT_ID` variable
+3. Add the Client Secret from your Slack app as a `CLIENT_SECRET` variable
 
+1. Open your cloned repo in your code editor of choice
+2. Update the `href` on the Log in to Slack button to include your Vercel redirect URL and your Slack app's client ID
 ```
-SLACK_TOKEN=<bot-or-app-token>
-CLIENT_ID=<slack-client-id>
-CLIENT_SECRET=<slack-client-secret>
+https://slack.com/oauth/v2/authorize?user_scope=emoji:read,reactions:read,search:read&amp;response_type=code&amp;redirect_uri=INSERT REDIRECT URL;client_id=INSERT SLACK CLIENT ID
 ```
+3. Commit and push and your app should autodeploy with Vercel.
+  
+You should now be up and running.
 
-4. Run the app (depends on environment — for Vercel, deploy as a serverless function; for local testing use a simple static server):
 
-```bash
-# serve static files from the project root
-npx serve .
-```
 
-How it works
-- The frontend triggers an OAuth flow to obtain an authorization code
-- The backend endpoint at `api/reaction-count/[exchange].ts` exchanges the code for an access token, retrieves messages with reactions, fetches reactions per message, aggregates counts, and returns a JSON array of { emoji, count, emojiUrl }
-- The frontend renders the bar chart from the JSON response
-
-Environment and security
-- This project requires Slack OAuth credentials and a Slack token with scopes to search messages and read reactions
-- Do not check credentials into source control. Use environment variables or a secrets store in your deploy platform.
-
-Notes & next steps
-- Add a loading state and better error handling UI (frontend)
-- Improve pagination and rate-limit handling (backend)
-- Add tests and CI
 
 License
 MIT
