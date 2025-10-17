@@ -55,7 +55,7 @@ If you are concerned about installing an external app into your workspace you ca
 1. Open your cloned repo in your code editor of choice
 2. Update the `href` on the Log in to Slack button to include your Vercel redirect URL and your Slack app's client ID
 ```
-https://slack.com/oauth/v2/authorize?user_scope=emoji:read,reactions:read,search:read&amp;response_type=code&amp;redirect_uri=INSERT REDIRECT URL;client_id=INSERT SLACK CLIENT ID
+https://slack.com/oauth/v2/authorize?user_scope=emoji:read,reactions:read,search:read&amp;response_type=code&amp;redirect_uri=INSERT REDIRECT URL&amp;client_id=INSERT SLACK CLIENT ID
 ```
 3. Commit and push and your app should autodeploy with Vercel.
   
