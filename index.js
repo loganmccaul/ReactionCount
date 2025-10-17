@@ -14,7 +14,7 @@
 /** INIT */
 // Generate bars based on reaction data
 const renderBars = (data) => {
-  const maxWidth = parseInt(data[0].count / 100 + 5) * 100;
+  const maxWidth = parseInt(data[0].count / 100 + 2) * 100;
   let normalizeWidth = 256 / maxWidth;
 
   const bars = document.querySelector(".bars");
