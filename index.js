@@ -78,7 +78,7 @@ const transitionAdd = (el) => {
 };
 
 // Iterate through loading
-const getRandomDuration = () => 2000 + Math.random() * 8000;
+const getRandomDuration = () => 2000 + Math.random() * 18000;
 let overrideTimeout;
 const iterateLoading = (duration) => {
   overrideTimeout = setTimeout(() => {
@@ -195,13 +195,13 @@ const copy = (bars) => {
     const emoji = bar.dataset.name;
 
     text = `${text}
-${index}${index < 10 ? '  ' : ''}  ${handleTextEmojis(emoji)}    ${count}  ${addBars(count.replace(',', ''))}`;
+${index}${index < 10 ? '  ' : ''}  ${handleTextEmojis(emoji)}  ${addBars(count.replace(',', ''))}  ${count}`;
   });
 
   // Add footer link
   text = `${text}
 
-█ = ~${barSize} reactions
+${maxCount > 20 ? `█ = ~${barSize} reactions` : ''}
 https://reaction-count.vercel.app`;
   return navigator.clipboard.writeText(text);
 };

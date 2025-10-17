@@ -13,7 +13,7 @@
  *  6. Return JSON response with reaction counts and emoji URLs
  */
 
-const { WebClient, ErrorCode, LogLevel } = require('@slack/web-api');
+const { WebClient } = require('@slack/web-api');
 import { jwtDecode } from "jwt-decode";
 import * as emoji from 'node-emoji'
 import getConcurrentRequests, { type AsyncFunction } from "../../utils/getConcurrentRequests";
@@ -49,15 +49,18 @@ interface TotalReactions {
 
 interface SlackJWTPayload {
     "https://slack.com/user_id": string;
+    "https://slack.com/team_id": string;
     [key: string]: any;
 }
 
-const getMessages = async (token: string, userId: string, page: number): Promise<GetMessagesResult> => {
+const getMessages = async (token: string, userId: string, teamId: string, page: number): Promise<GetMessagesResult> => {
+    const ninetydaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const messagesWithReactions = await web.search.messages({
         token,
-        query: `from:${userId} has:reaction`,
+        query: `from:${userId} has::hot-garbage-deal-with-it: after:${ninetydaysAgo}`,
         count: 100,
-        page
+        page,
+        'team_id': teamId
     });
 
     const messages: Message[] = messagesWithReactions.messages.matches.map((match: SlackSearchMatch) => ({
@@ -97,23 +100,19 @@ export async function GET(request: Request) {
     });
 
     // Get user ID from the ID Token
-    const {"https://slack.com/user_id": userId } = jwtDecode<SlackJWTPayload>(jwt);
+    const {"https://slack.com/user_id": userId, "https://slack.com/team_id": teamId } = jwtDecode<SlackJWTPayload>(jwt);
 
     // Get custom emojies
     const emojis = await web.emoji.list({ token: accessToken });
-    console.log(emojis);
-
-    const startTime = Date.now();
-    console.log("// Start: ", startTime);
 
     // Get first page of messages with reactions
-    let { messages, totalPages } = await getMessages(accessToken, userId, 1);
+    let { messages, totalPages } = await getMessages(accessToken, userId, teamId, 1);
     
     // Send off a request for the rest of the pages
     const additionalMessagesRequests: AsyncFunction<GetMessagesResult>[] = [];
     if (totalPages > 1) {
         for (let page = 2; page <= totalPages; page++) {
-            additionalMessagesRequests.push(() => getMessages(accessToken, userId, page));
+            additionalMessagesRequests.push(() => getMessages(accessToken, userId, teamId, page));
         }
     }
     const pages = await getConcurrentRequests(additionalMessagesRequests, 10); // Batch 10 requests at a time to maximize performance with rate limits
@@ -121,24 +120,31 @@ export async function GET(request: Request) {
         messages = messages.concat(additionalMessages);
     });
 
-    console.log("// Messages: ", messages.length, Date.now() - startTime);
-
     // Get reactions for each message
-    const allReactions = await getConcurrentRequests(messages.map(({ channel, timestamp }) => () => getReactions(accessToken, channel, timestamp)), 25); // Batch 25 requests at a time to maximize performance with rate limits
+    const allReactions = await getConcurrentRequests(messages.map(({ channel, timestamp }) => () => getReactions(accessToken, channel, timestamp)), 2); // Batch 25 requests at a time to maximize performance with rate limits
     
     let totalReactions: TotalReactions = {};   
     const reactions = allReactions.flat();
     reactions.forEach(({ name, count }) => {
-        const currentCount = totalReactions[name];
-        if (currentCount) {
-            return totalReactions[name] = currentCount + count;
+        let key = name;
+        if (name.includes('::')) {
+            // Ignore reaction variations like +1::skin-tone-3
+            key = name.split('::')[0];
         }
-        return totalReactions[name] = count;
+
+        const currentCount = totalReactions[key];
+        if (currentCount) {
+            return totalReactions[key] = currentCount + count;
+        }
+        return totalReactions[key] = count;
     });
 
-    const sortedResponse = Object.entries(totalReactions).sort((a, b) => b[1] - a[1]).map(reaction => ({emoji: emoji.get(reaction[0]) ?? emoji.get(reaction[0].replace('-', '_')) ?? reaction[0], count: reaction[1], emojiUrl: emojis.emoji[reaction[0]]}));
+    
+    const getEmoji = (name: string) => {
+        return emoji.get(name) ?? emoji.get(name.replace('-', '_')) ?? emoji.search(name.replace('_', ' '))[0]?.emoji ?? emoji.get(name.split('_')[0]) ?? emoji.search(name)[0]?.emoji ?? name;
+    }
 
-    console.log("// Reactions: ", Date.now() - startTime);
+    const sortedResponse = Object.entries(totalReactions).sort((a, b) => b[1] - a[1]).map(reaction => ({emoji: getEmoji(reaction[0]), count: reaction[1], emojiUrl: emojis.emoji[reaction[0]]}));
 
     return new Response(JSON.stringify(sortedResponse));
 }
